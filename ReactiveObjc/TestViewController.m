@@ -21,23 +21,31 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    //普通按钮点击事件响应
 //    [self normalButton_targetAction];
     
+    //RAC按钮点击事件响应
 //    [self RACButton_targetAction];
     
+    //使用KVO监听属性
 //    [self KVO_method];
     
+    //RAC替代KVO方法
 //    [self RAC_KVO];
 
     self.testLable.text = @"change1";
     self.testLable.text = @"change0";
     
+    //RAC替代delegate使用方法
 //    [self RACTextFieldDelegate];
     
+    //RAC替代通知使用方法
 //    [self RACNotification];
     
+    //RAC遍历字典、数组
     [self RACSequence];
     
+    //RAC基本使用方法
     [self RACBase];
     // Do any additional setup after loading the view from its nib.
 }
