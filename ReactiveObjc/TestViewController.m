@@ -8,6 +8,7 @@
 
 #import "TestViewController.h"
 #import <ReactiveObjC.h>
+#import <ReactiveObjC/RACReturnSignal.h>
 
 @interface TestViewController ()<UITextFieldDelegate>
 @property (weak, nonatomic) IBOutlet UILabel *testLable;
@@ -33,8 +34,8 @@
     //RAC替代KVO方法
 //    [self RAC_KVO];
 
-    self.testLable.text = @"change1";
-    self.testLable.text = @"change0";
+//    self.testLable.text = @"change1";
+//    self.testLable.text = @"change0";
     
     //RAC替代delegate使用方法
 //    [self RACTextFieldDelegate];
@@ -43,11 +44,43 @@
 //    [self RACNotification];
     
     //RAC遍历字典、数组
-    [self RACSequence];
+//    [self RACSequence];
     
     //RAC基本使用方法
-    [self RACBase];
+//    [self RACBase];
+    
+    //RAC map映射
+//    [self flattenMap];
+    
+    //RAC filter过滤
+//    [self RACfilter];
+    
+//    [self ignoreValue];
+    
+    //RAC 过滤变换信号
+    [self distinctUntilChanged];
+    
     // Do any additional setup after loading the view from its nib.
+}
+
+- (void)flattenMap
+{
+//    [[self.testTextField.rac_textSignal flattenMap:^__kindof RACSignal * _Nullable(NSString * _Nullable value) {
+//
+//        //自定义返回内容
+//        return [RACReturnSignal return:[NSString stringWithFormat:@"自定义了返回信号：%@",value]];
+//    }] subscribeNext:^(id  _Nullable x) {
+//        NSLog(@"%@",x);
+//        NSLog(@"%@",NSStringFromClass([x class]));
+//    }];
+    
+    
+    [[self.testTextField.rac_textSignal map:^id _Nullable(NSString * _Nullable value) {
+        return [NSString stringWithFormat:@"map自定义了返回信号：%@",value];
+    }] subscribeNext:^(id  _Nullable x) {
+        NSLog(@"%@",x);
+        NSLog(@"%@",NSStringFromClass([x class]));
+    }];
 }
 
 - (void)normalButton_targetAction
@@ -168,6 +201,47 @@
     [signal subscribeError:^(NSError * _Nullable error) {
         NSLog(@"%@",error);
     }];
+}
+
+- (void)RACfilter
+{
+    @weakify(self);
+    [[self.testTextField.rac_textSignal filter:^BOOL(NSString * _Nullable value) {
+        //过滤判断条件
+        @strongify(self)
+        if (self.testTextField.text.length >= 6) {
+            self.testTextField.text = [self.testTextField.text substringToIndex:6];
+            self.testLable.text = @"已经到6位了";
+            self.testLable.textColor = [UIColor redColor];
+        }
+        return value.length <= 6;
+        
+    }] subscribeNext:^(NSString * _Nullable x) {
+        //订阅逻辑区域
+        NSLog(@"filter过滤后的订阅内容：%@",x);
+    }];
+}
+
+- (void)ignoreValue
+{
+    [[self.testTextField.rac_textSignal ignoreValues] subscribeNext:^(id  _Nullable x) {
+        //将self.testTextField的所有textSignal全部过滤掉
+    }];
+    
+    [[self.testTextField.rac_textSignal ignore:@"1"] subscribeNext:^(id  _Nullable x) {
+        //将self.testTextField的textSignal中字符串为指定条件的信号过滤掉
+    }];
+}
+
+- (void)distinctUntilChanged
+{
+    RACSubject *subject = [RACSubject subject];
+    [[subject distinctUntilChanged] subscribeNext:^(id  _Nullable x) {
+        NSLog(@"%@",x);
+    }];
+    [subject sendNext:@1111];
+    [subject sendNext:@2222];
+    [subject sendNext:@2222];
 }
 
 - (void)didReceiveMemoryWarning {
